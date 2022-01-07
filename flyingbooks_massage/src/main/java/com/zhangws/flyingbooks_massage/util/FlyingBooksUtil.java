@@ -1,15 +1,15 @@
 package com.zhangws.flyingbooks_massage.util;
 
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.tomcat.util.codec.binary.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+
 
 /**
  * @Author: zhangWs
@@ -19,29 +19,32 @@ import java.security.NoSuchAlgorithmException;
  */
 public class FlyingBooksUtil {
 
-
     public static void main(String[] args) {
-        String secret = "GWBV9AvFZpYCh8J0jwkBPe";
-        String token = "47fc8330-6f68-4261-b762-8fdf82959468";
-        String baseUrl= "https://open.feishu.cn/open-apis/bot/v2/hook/"+token;
+        String secret = "VQYTIsMeNInuspjrOc1YOh";
+        String baseUrl= "https://open.feishu.cn/open-apis/bot/v2/hook/b29ad0d1-9a23-439a-9b2b-df2582337efd";
 
-        String result = send("adadadad", baseUrl,secret);
-        System.out.println(result);
+        String send = send("哈哈哈", baseUrl, secret);
+        System.out.println(send);
     }
 
 
     public static String send(String massage,String baseUrl,String secret){
         String result = "";
-
+        long timestamp = System.currentTimeMillis();
+        String sign = genSign(timestamp,secret);
+        System.out.println(sign+"："+timestamp);
         try{
-            String url = genSign(baseUrl, secret);
             JSONObject body = new JSONObject();
+            body.put("timestamp",timestamp);
+            body.put("sign",sign);
+
             body.put("msg_type","text");
 
-            body.put("content",massage);
+            JSONObject text = new JSONObject();
+            text.put("text",massage);
 
-            result = HttpUtil.sendJsonPost(url,body.toJSONString());
-
+            body.put("content",text);
+           result = HttpUtil.createPost(baseUrl).body(JSONUtil.toJsonStr(body)).execute().body();
 
         }catch (Exception e){
             e.printStackTrace();
@@ -55,14 +58,11 @@ public class FlyingBooksUtil {
      * @Date: 2022/1/4 9:18
      * @Description: 获取签名
      * @Param: secret 密钥
-     * @return 获取拼接了timestamp和sign的url
      */
 
-    private static String genSign(String baseUrl,String secret) {
-        String url = "";
+    private static String genSign(long timestamp, String secret) {
 
         try{
-            long timestamp = System.currentTimeMillis();
             //把timestamp+"\n"+密钥当做签名字符串
             String stringToSign = timestamp + "\n" + secret;
 
@@ -70,13 +70,12 @@ public class FlyingBooksUtil {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(stringToSign.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] signData = mac.doFinal(new byte[]{});
-            url = baseUrl+"&timestamp=" + timestamp + "&sign=" +
-                    URLEncoder.encode(new String(Base64.encodeBase64(signData)), "UTF-8");
 
+            return new String(Base64.encodeBase64(signData));
 
         }catch (Exception e){
             e.printStackTrace();
         }
-        return url;
+        return null;
     }
 }
