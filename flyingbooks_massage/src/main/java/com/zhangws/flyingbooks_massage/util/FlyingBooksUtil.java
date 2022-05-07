@@ -20,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 public class FlyingBooksUtil {
 
     public static void main(String[] args) {
-        String secret = "VQYTIsMeNInuspjrOc1YOh";
-        String baseUrl= "https://open.feishu.cn/open-apis/bot/v2/hook/b29ad0d1-9a23-439a-9b2b-df2582337efd";
+        String secret = "KI5Go9Ned2BSHRirFSegxf";
+        String baseUrl= "https://open.feishu.cn/open-apis/bot/v2/hook/077e8860-0791-4ae2-8120-f12cffa922db";
 
         String send = send("哈哈哈", baseUrl, secret);
         System.out.println(send);
